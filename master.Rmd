@@ -8,7 +8,7 @@ output: html_document
 ```{r}
 library(dplyr)
 library(ggplot2)
-
+library(ggpubr)
 ```
 
 # Part 1: Data Preparation
@@ -171,7 +171,94 @@ apply(master[,c(5, 6, 7)], 2, mean)
 ```{r,warning=F}
 
 # suicides_no and population
-ggplot(master, aes(x=population, y=suicides_no, colour=suicides.100k.pop)) +
+ggplot(master, aes(x = population, y = suicides_no, colour = suicides.100k.pop)) +
   geom_point() +
-  labs(title="Scatter plot of suicides_no and population") 
+  labs(title = "Scatter plot of suicides_no and population") 
 ```
+
+
+```{r}
+# population
+p1 <- ggplot(master, aes(x = population, y = suicides.100k.pop, colour = factor(sex))) +
+  geom_point()
+# gdp_for_year
+p2<- ggplot(master, aes(x = gdp_for_year...., y = suicides.100k.pop, colour = factor(sex))) +
+  geom_point()
+# gdp_per_capita ($)
+p3 <- ggplot(master, aes(x = gdp_per_capita...., y = suicides.100k.pop, colour = factor(sex))) +
+  geom_point()
+# NV.SRV.TOTL.ZS
+p4 <- ggplot(master, aes(x = NV.SRV.TOTL.ZS, y = suicides.100k.pop, colour = factor(sex))) +
+  geom_point()
+# NV.IND.TOTL.ZS
+p4 <- ggplot(master, aes(x = NV.IND.TOTL.ZS, y = suicides.100k.pop, colour = factor(sex))) +
+  geom_point()
+# NV.IND.MANF.ZS
+p5 <- ggplot(master, aes(x = NV.IND.MANF.ZS, y = suicides.100k.pop, colour = factor(sex))) +
+  geom_point()
+# NV.AGR.TOTL.ZS
+p6 <- ggplot(master, aes(x = NV.AGR.TOTL.ZS, y = suicides.100k.pop, colour = factor(sex))) +
+  geom_point()
+
+ggarrange(p1, p2, p3, p4, p5, p6, ncol = 2, nrow = 3)
+```
+
+```{r}
+#Bar plot of categorical variables
+#count for countries
+###FIXME: might need to adjust the size
+ggplot(master,aes(country)) +
+  geom_bar(position="dodge") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+```{r}
+# check counts for different age groups
+ggplot(master, aes(age)) +
+  geom_bar(position = "dodge")
+
+```
+
+```{r}
+#for genders
+ggplot(master, aes(sex)) +
+  geom_bar(position = "dodge")
+```
+
+```{r}
+#different generation groups
+ggplot(master, aes(generation)) +
+  geom_bar(position = "dodge")
+```
+```{r}
+# Boxplot plot of categorical variables and suicides.100k.pop
+p1 <- ggplot(master,
+             aes(x = sex, y = suicides.100k.pop, group = sex)) +
+  geom_boxplot()
+p2 <- ggplot(master,aes(x = age, y = suicides.100k.pop, group = age)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+p3 <- ggplot(master, aes(x = generation, y = suicides.100k.pop, group = generation)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggarrange(p1, p2, p3, ncol = 3, nrow = 1)
+```
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
