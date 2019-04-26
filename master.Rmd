@@ -9,6 +9,7 @@ output: html_document
 library(dplyr)
 library(ggplot2)
 library(ggpubr)
+library(tidyr)
 ```
 
 # Part 1: Data Preparation
@@ -244,21 +245,87 @@ p3 <- ggplot(master, aes(x = generation, y = suicides.100k.pop, group = generati
 ggarrange(p1, p2, p3, ncol = 3, nrow = 1)
 ```
 
-```{r}
 
+# Part 4: Data Analysis
+## 4.1 Cluster analysis
+### First of all, the classification of variables as dummy variables. 
+###Secondly, standardization of data.
+```{r}
+# dummy variables
+sex <- as.data.frame(model.matrix(~sex,master))
+age <- as.data.frame(model.matrix(~age,master))
+generation <- as.data.frame(model.matrix(~generation, master))
+master2 <- cbind(master,age[,-1],sex[,-1],generation[,-1])
+master2 <- master2[,-c(3,4,10)]
+```
+
+```{r}
+# standardization
+master_scale <- scale(master2[,-c(1, 2, 3, 5)])
+master_scale <- as.data.frame(master_scale)
+```
+
+### K-means
+```{r}
+# Determining the Best Cluster Number
+wss<-numeric(15)
+for (k in 1:15){
+   wss[k] <- sum(kmeans(master_scale, centers = k, nstart = 10)$withinss)
+}
+plot(1:15, wss, 
+     type = "b", 
+     xlab = "x",
+     ylab = "y")
 ```
 
 
 
 
+```{r}
+# K-means (k=3)
+km <- kmeans(master_scale, 3)
+suicides <- as.data.frame(cbind(master$suicides.100k.pop, km$cluster))
+boxplot(suicides$V1~suicides$V2, 
+        xlab="cluster", 
+        ylab = "suicides.100k.pop")
+```
 
 
+```{r}
+# K-means (k=5)
+km <- kmeans(master_scale, 5)
+suicides <- as.data.frame(cbind(master$suicides.100k.pop, km$cluster))
+boxplot(suicides$V1~suicides$V2, 
+        xlab="cluster", 
+        ylab = "suicides.100k.pop")
+```
 
 
+# .2 Multiple regression analysis
+### Data from 1997 to 2013 for training and data from 2014 to 2016 for testing.The rmse of multiple linear regression is 3.761684, and the RMSE of decision tree is 3.23228. The prediction of decision tree is more accurate.
 
 
+```{r}
+# train test split
+traindata <- master[-which(master$year > 2013), -5]
+testdata <- master[which(master$year > 2013), -5]
+# fit lm
+fit_lm <- lm(suicides.100k.pop~.,data = traindata[,-c(1, 2)])
+summary(fit_lm)
+```
 
+```{r}
+# Regression diagnosis
+par(mfrow = c(2, 2))
+plot(fit_lm)
+```
 
-
+```{r}
+# predict on test dataset
+lm_pre <- predict(fit_lm,testdata)
+# Using RMSE as the evluation score
+rmse <- (sum((testdata$suicides.100k.pop-lm_pre) ^ 2) / nrow(master)) ^ 0.5
+rmse
+```
 
 
