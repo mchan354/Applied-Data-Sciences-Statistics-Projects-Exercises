@@ -3,14 +3,24 @@ title: "Untitled"
 output: html_document
 ---
 
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+```
+
 # Part 1: Data Preparation
 
 The missing rate of  HDI.for.year in master.CSV is 69.93%, so delete this variable and select the data from 1996 to 2016 for analysis. In the Economic data, four indicators, namely "Services, value added (% of GDP)", "Industry (including construction), value added (% of GDP)", "Manufacturing, value added (% of GDP)", "Agriculture, forestry, and fishing, value added (% of GDP), were selected to analyze their impact on suicide rate.
 
 ```{r setup, include=FALSE}
-#my file location: C:\Users\a5730\Downloads\380_final
-setwd("C:\\users\\a5730\\Downloads\\380_final")
+#my file location: C:\Users\a5730\OneDrive\Documents\STAT380\Stat380Final_Chan_Tang
+setwd("C:\\users\\a5730\\OneDrive\\Documents\\STAT380\\Stat380Final_Chan_Tang")
+```
 
+```{r}
 #Suicide rate Dataset
 master <- read.csv("master.csv", 
                    header = T, 
@@ -77,5 +87,91 @@ colSums(is.na(master))/nrow(master)
 master <- na.omit(master)
 ```
 
-# Part 2: Data Introduction
+# Part 2: Data Wrangling
 
+## A. General purpose data wrangling
+
+```{r,warning=F}
+#my file location: C:\Users\a5730\OneDrive\Documents\STAT380\Stat380Final_Chan_Tang
+setwd("C:\\users\\a5730\\OneDrive\\Documents\\STAT380\\Stat380Final_Chan_Tang")
+master <- read.csv("master_new.csv",stringsAsFactors = F)
+```
+
+```{r}
+# summarise and group_by
+# Annual statistics on suicide rates and suicides
+head(summarise(group_by(master, year),
+                   max_suicides.100k.pop = max(suicides.100k.pop),
+                   avg_suicides_no = mean(suicides_no),    
+                   sum_suicides_no = sum(suicides_no))) 
+
+# Statistics on suicide rates and suicides per country per year
+head(summarise(group_by(master, year, country),
+                   avg_suicides_no = mean(suicides_no),    
+                   sum_suicides_no = sum(suicides_no),
+                   suicide_rates_100k = sum(suicides_no) / sum(population) * 100000)) # suicide_rates*100000
+# country 
+print(distinct(master, country))
+```
+## B. Spread & gather to stack/unstack variables
+
+```{r,warning=F}
+# sex, suicides_no and population
+data1 <- stack(master[,c(3, 5, 6)])
+head(data1)
+data2 <- unstack(data1, values~ind)
+head(data2)
+```
+
+## C. User-defined functions
+
+```{r,warning=F}
+# Mode
+fun2 <- function(x){
+  t <- as.data.frame(table(x))
+  t.max <- t[which(t[,2] == max(t[,2])),1]
+  return(t.max)
+} 
+# The mode of suicides_no
+fun2(master$suicides_no)
+```
+
+## D. loops and/or control flow
+
+Calculate suicide rate for people over 35 years old and under 35 years old.It was found that the suicide rate of people over 35 years old was significantly higher than that of people under 35 years old.
+
+```{r,warning=F}
+age <- NA
+for(i in 1:nrow(master)){
+  if(master$age[i] %in% c("5-14 years", "15-24 years", "25-34 years")){
+    age[i] <- 0
+  }else{
+    age[i] <- 1
+  }
+}
+age <- cbind(master[,c(5,6)], age)
+# Suicide rate less than 35 years old * 100K
+sum(age[which(age$age==0), 1]) / sum(as.numeric(age[which(age$age == 0), 2])) * 100000
+# Suicide rate more than 35 years old * 100K
+sum(age[which(age$age == 1), 1]) / sum(as.numeric(age[which(age$age == 1), 2])) * 100000
+```
+
+## E. Apply
+
+```{r,warning=F}
+# sapply  sex and suicides_no
+sapply(unstack(master[,c(5,3)]), mean)
+# apply 
+apply(master[,c(5, 6, 7)], 2, mean)
+```
+
+
+# Part 3: Data Visualization
+
+```{r,warning=F}
+
+# suicides_no and population
+ggplot(master, aes(x=population, y=suicides_no, colour=suicides.100k.pop)) +
+  geom_point() +
+  labs(title="Scatter plot of suicides_no and population") 
+```
