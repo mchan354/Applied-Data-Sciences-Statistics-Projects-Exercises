@@ -16,10 +16,6 @@ library(tidyr)
 
 The missing rate of  HDI.for.year in master.CSV is 69.93%, so delete this variable and select the data from 1996 to 2016 for analysis. In the Economic data, four indicators, namely "Services, value added (% of GDP)", "Industry (including construction), value added (% of GDP)", "Manufacturing, value added (% of GDP)", "Agriculture, forestry, and fishing, value added (% of GDP), were selected to analyze their impact on suicide rate.
 
-```{r setup, include=FALSE}
-#my file location: C:\Users\a5730\OneDrive\Documents\STAT380\Stat380Final_Chan_Tang
-#setwd("C:\\users\\a5730\\OneDrive\\Documents\\STAT380\\Stat380Final_Chan_Tang")
-```
 
 ```{r}
 #Suicide rate Dataset
@@ -93,8 +89,7 @@ master <- na.omit(master)
 ## A. General purpose data wrangling
 
 ```{r,warning=F}
-#my file location: C:\Users\a5730\OneDrive\Documents\STAT380\Stat380Final_Chan_Tang
-#setwd("C:\\users\\a5730\\OneDrive\\Documents\\STAT380\\Stat380Final_Chan_Tang")
+
 master <- read.csv("master_new.csv",stringsAsFactors = F)
 ```
 
@@ -265,7 +260,7 @@ master_scale <- scale(master2[,-c(1, 2, 3, 5)])
 master_scale <- as.data.frame(master_scale)
 ```
 
-### K-means
+### K-means data analysis
 ```{r}
 # Determining the Best Cluster Number
 wss<-numeric(15)
@@ -289,7 +284,14 @@ boxplot(suicides$V1~suicides$V2,
         xlab="cluster", 
         ylab = "suicides.100k.pop")
 ```
-
+```{r}
+# K-means (k=4)
+km <- kmeans(master_scale, 4)
+suicides <- as.data.frame(cbind(master$suicides.100k.pop, km$cluster))
+boxplot(suicides$V1~suicides$V2, 
+        xlab="cluster", 
+        ylab = "suicides.100k.pop")
+```
 
 ```{r}
 # K-means (k=5)
