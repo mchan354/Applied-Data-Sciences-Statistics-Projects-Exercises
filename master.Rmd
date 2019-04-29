@@ -18,7 +18,7 @@ The missing rate of  HDI.for.year in master.CSV is 69.93%, so delete this variab
 
 ```{r setup, include=FALSE}
 #my file location: C:\Users\a5730\OneDrive\Documents\STAT380\Stat380Final_Chan_Tang
-setwd("C:\\users\\a5730\\OneDrive\\Documents\\STAT380\\Stat380Final_Chan_Tang")
+#setwd("C:\\users\\a5730\\OneDrive\\Documents\\STAT380\\Stat380Final_Chan_Tang")
 ```
 
 ```{r}
@@ -94,7 +94,7 @@ master <- na.omit(master)
 
 ```{r,warning=F}
 #my file location: C:\Users\a5730\OneDrive\Documents\STAT380\Stat380Final_Chan_Tang
-setwd("C:\\users\\a5730\\OneDrive\\Documents\\STAT380\\Stat380Final_Chan_Tang")
+#setwd("C:\\users\\a5730\\OneDrive\\Documents\\STAT380\\Stat380Final_Chan_Tang")
 master <- read.csv("master_new.csv",stringsAsFactors = F)
 ```
 
@@ -139,7 +139,7 @@ fun2(master$suicides_no)
 
 ## D. loops and/or control flow
 
-Calculate suicide rate for people over 35 years old and under 35 years old.It was found that the suicide rate of people over 35 years old was significantly higher than that of people under 35 years old.
+Calculate suicide rate for people over 35 years old and under 35 years old.It was found that the suicide rate of people over 35 years old was significantly higher than that of people under 35 years old. The suicide rate for men over 35 was 16.72724 percent and the suicide rate for people under 35 was 7.34 percent.
 
 ```{r,warning=F}
 age <- NA
@@ -205,8 +205,8 @@ ggarrange(p1, p2, p3, p4, p5, p6, ncol = 2, nrow = 3)
 ```
 
 ```{r}
-#Bar plot of categorical variables
-#count for countries
+# Bar plot of categorical variables in the dataset
+# count for countries
 ###FIXME: might need to adjust the size
 ggplot(master,aes(country)) +
   geom_bar(position="dodge") +
@@ -227,7 +227,7 @@ ggplot(master, aes(sex)) +
 ```
 
 ```{r}
-#different generation groups
+#different generation groups graph
 ggplot(master, aes(generation)) +
   geom_bar(position = "dodge")
 ```
