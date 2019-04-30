@@ -264,6 +264,34 @@ ggarrange(p1, p2, p3, ncol = 3, nrow = 1)
 
 
 # Part 4: Data Analysis
+
+# .A Supervised learning multiple regression analysis
+### Data from 1997 to 2013 for training and data from 2014 to 2016 for testing.The rmse of multiple linear regression is 3.761684, and the RMSE of decision tree is 3.23228. The prediction of decision tree is more accurate.
+
+
+```{r}
+# train test split
+traindata <- master[-which(master$year > 2013), -5]
+testdata <- master[which(master$year > 2013), -5]
+# fit lm
+fit_lm <- lm(suicides.100k.pop~.,data = traindata[,-c(1, 2)])
+summary(fit_lm)
+```
+
+```{r}
+# Regression diagnosis
+par(mfrow = c(2, 2))
+plot(fit_lm)
+```
+
+```{r}
+# predict on test dataset
+lm_pre <- predict(fit_lm,testdata)
+# Using RMSE as the evluation score
+rmse <- (sum((testdata$suicides.100k.pop-lm_pre) ^ 2) / nrow(master)) ^ 0.5
+rmse
+```
+
 ## B. Unsupervised learning 
 ### First, we generated the classification of variables as dummy variables. 
 ### Secondly, we standardized the data.
@@ -339,34 +367,7 @@ boxplot(suicides$V1~suicides$V2,
         xlab="population cluster", 
         ylab = "suicide number")
 ```
-
-# .2 Multiple regression analysis
-### Data from 1997 to 2013 for training and data from 2014 to 2016 for testing.The rmse of multiple linear regression is 3.761684, and the RMSE of decision tree is 3.23228. The prediction of decision tree is more accurate.
-
-
-```{r}
-# train test split
-traindata <- master[-which(master$year > 2013), -5]
-testdata <- master[which(master$year > 2013), -5]
-# fit lm
-fit_lm <- lm(suicides.100k.pop~.,data = traindata[,-c(1, 2)])
-summary(fit_lm)
-```
-
-```{r}
-# Regression diagnosis
-par(mfrow = c(2, 2))
-plot(fit_lm)
-```
-
-```{r}
-# predict on test dataset
-lm_pre <- predict(fit_lm,testdata)
-# Using RMSE as the evluation score
-rmse <- (sum((testdata$suicides.100k.pop-lm_pre) ^ 2) / nrow(master)) ^ 0.5
-rmse
-```
-###.3  Random Simulation
+###.C User-Defined Random Simulation
 
 ### Here we generated 1000 simulations for the mean of the number of suicides in the whole world for all ages, all countries, all of the generations, and all of the GDP in the world combined. We also generated a 95 percent confidence interval for the number of suicide means. We can conclude that we are 95 percent confident that the mean number of suicides in this world are between ~145 and ~ 380. This gives people a general idea of the average number of suicides that occur in the world. 
 
