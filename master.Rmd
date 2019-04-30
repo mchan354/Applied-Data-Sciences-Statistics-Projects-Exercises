@@ -31,6 +31,8 @@ Economic <- read.csv("API_3_DS2_en_csv_v2_10523844.csv",
                      stringsAsFactors = F)
 ```
 
+
+We selected the columns for analysis which the year was greater than 1996 and less than 2017
 ```{r}
 # missing rate
 colSums(is.na(master))/nrow(master)
@@ -74,6 +76,7 @@ Economic2 <- merge(Economic2, Economic_Agriculture,
 ```
 
 
+We merged the master and Economic data set and we deleted all of our data that had missing values for our analysis
 ```{r}
 # merge master and Economic2
 master <- merge(master, Economic2,
@@ -112,6 +115,7 @@ print(distinct(master, country))
 ```
 ## B. Spread & gather to stack/unstack variables
 
+We used the spread function to show the males and females along with their corresponding suicide number and population 
 ```{r,warning=F}
 # sex, suicides_no and population
 data1 <- stack(master[,c(3, 5, 6)])
@@ -121,6 +125,8 @@ head(data2)
 ```
 
 ## C. User-defined functions
+
+We set a user defined function to calculate the mode of the suicide numbers.
 
 ```{r,warning=F}
 # Mode
@@ -165,14 +171,15 @@ apply(master[,c(5, 6, 7)], 2, mean)
 
 # Part 3: Data Visualization
 
+A scatterplot is generated showing the relationship between population and suicide numbers. We can conclude that when the population is between 0 and 2x10^7 , most of the number of sucides are between 0 and 5000. The greatest number of suicides occur with a population of 2x10^7 with a number of 20000 associated with some countries.
+
 ```{r,warning=F}
 
 # suicides_no and population
-ggplot(master, aes(x = population, y = suicides_no, colour = suicides.100k.pop)) +
-  geom_point() +
+ggplot(master, aes(x = population, y = suicides_no, colour = suicides.100k.pop)) + geom_point() +
   labs(title = "Scatter plot of suicides_no and population") 
 ```
-
+### Scatter plots showing the relationship between the factor levels sex between population and sucicides per population in 1000, gdp for year vs suicides per population in 1000, NV.SRV.TOTL.ZS vs sucides per population in 1000, NV.IND.TOTL.ZS  vs per population in 1000,  NV.IND.MANF.ZS vs sucicides per population in 1000, and  NV.AGR.TOTL.ZS vs sucicides per population in 1000. 
 
 ```{r}
 # population
