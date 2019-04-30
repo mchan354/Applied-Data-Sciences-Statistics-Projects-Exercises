@@ -3,6 +3,7 @@ title: "Stat 380 Final Project"
 output: html_document
 ---
 
+In this project, we read in 2 datasets (Economic and Master) to generate some statistics and visuals to explore the relationships among the suicide numbers and other variables(GDP, Age, Population,etc) in the dataset.   
 
 
 ```{r}
@@ -11,6 +12,7 @@ library(ggplot2)
 library(ggpubr)
 library(tidyr)
 library(mosaic)
+library(mclust)
 ```
 
 # Part 1: Data Preparation
@@ -32,7 +34,7 @@ Economic <- read.csv("API_3_DS2_en_csv_v2_10523844.csv",
 ```
 
 
-We selected the columns for analysis which the year was greater than 1996 and less than 2017
+We selected the columns for analysis which the year was greater than 1996 and less than 2017.
 ```{r}
 # missing rate
 colSums(is.na(master))/nrow(master)
@@ -40,6 +42,7 @@ colSums(is.na(master))/nrow(master)
 master <- master[which(master$year>1996 & master$year<2017),-c(8,9)]
 ```
 
+We explore what the data looks like
 ```{r}
 # Economic data processing
 fun1 <- function(x){
@@ -64,6 +67,8 @@ Economic_Industry <- fun1(value[2])
 Economic_Manufacturing <- fun1(value[3])
 Economic_Agriculture <- fun1(value[4])
 
+
+# Joins the data of the two different sources (Economic and Master)
 Economic2 <- merge(Economic_Services, Economic_Industry, 
                    all = T, 
                    by=c("country","year"))
@@ -76,7 +81,7 @@ Economic2 <- merge(Economic2, Economic_Agriculture,
 ```
 
 
-We merged the master and Economic data set and we deleted all of our data that had missing values for our analysis
+We merged the master and Economic data set and we deleted all of our data that had missing values for our analysis. The output is the rate of the missing values.
 ```{r}
 # merge master and Economic2
 master <- merge(master, Economic2,
@@ -91,7 +96,7 @@ master <- na.omit(master)
 # Part 2: Data Wrangling
 
 ## A. General purpose data wrangling
-
+We read in the joined dataset and we performed the general purpose of data wrangling by generating the annual statistics on suicide rates and suicide and statistics on suicide rates and suicides per year.
 ```{r,warning=F}
 
 master <- read.csv("master_new.csv",stringsAsFactors = F)
@@ -115,7 +120,7 @@ print(distinct(master, country))
 ```
 ## B. Spread & gather to stack/unstack variables
 
-We used the spread function to show the males and females along with their corresponding suicide number and population 
+We used the stack function to put together the sex, suicide numbers, and population and the unstack function to convert the dataset from stacked form to unstacked form to show the males and females along with their corresponding suicide number and population.
 ```{r,warning=F}
 # sex, suicides_no and population
 data1 <- stack(master[,c(3, 5, 6)])
@@ -124,9 +129,9 @@ data2 <- unstack(data1, values~ind)
 head(data2)
 ```
 
-## C. User-defined functions
+## D. User-defined functions
 
-We set a user defined function to calculate the mode of the suicide numbers.
+We set a user defined function called fun2 to calculate the mode of the suicide numbers.
 
 ```{r,warning=F}
 # Mode
@@ -139,9 +144,9 @@ fun2 <- function(x){
 fun2(master$suicides_no)
 ```
 
-## D. loops and/or control flow
+## E. loops and/or control flow
 
-Calculate suicide rate for people over 35 years old and under 35 years old.It was found that the suicide rate of people over 35 years old was significantly higher than that of people under 35 years old. The suicide rate for men over 35 was 16.72724 percent and the suicide rate for people under 35 was 7.34 percent.
+We used a loop and control flow to calculate suicide rate for people over 35 years old and under 35 years old.It was found that the suicide rate of people over 35 years old was significantly higher than that of people under 35 years old. The suicide rate for men over 35 was 16.72724 percent and the suicide rate for people under 35 was 7.34 percent.
 
 ```{r,warning=F}
 age <- NA
@@ -159,7 +164,8 @@ sum(age[which(age$age==0), 1]) / sum(as.numeric(age[which(age$age == 0), 2])) * 
 sum(age[which(age$age == 1), 1]) / sum(as.numeric(age[which(age$age == 1), 2])) * 100000
 ```
 
-## E. Apply
+## F. Vectorized Functions (Apply)
+We used the apply function to generate the mean of the suicide numbers, number of females,number of males, the population, and the number of suicides per 100k.
 
 ```{r,warning=F}
 # sapply  sex and suicides_no
@@ -170,8 +176,8 @@ apply(master[,c(5, 6, 7)], 2, mean)
 
 
 # Part 3: Data Visualization
-
-A scatterplot is generated showing the relationship between population and suicide numbers. We can conclude that when the population is between 0 and 2x10^7 , most of the number of sucides are between 0 and 5000. The greatest number of suicides occur with a population of 2x10^7 with a number of 20000 associated with some countries.
+## A. Scatter Plot Using geom
+A scatterplot is generated showing the relationship between population and suicide numbers. From the visual, it shows that when the population is between 0 and 2x10^7 , most of the number of sucides are between 0 and 5000. There are some outliers shown at the population of 2x10^7 (the greatest number of suicides occur with a population of 2x10^7 with a number of 20000 associated with some countries).
 
 ```{r,warning=F}
 
@@ -179,7 +185,9 @@ A scatterplot is generated showing the relationship between population and suici
 ggplot(master, aes(x = population, y = suicides_no, colour = suicides.100k.pop)) + geom_point() +
   labs(title = "Scatter plot of suicides_no and population") 
 ```
-### Scatter plots showing the relationship between the factor levels sex between population and sucicides per population in 1000, gdp for year vs suicides per population in 1000, NV.SRV.TOTL.ZS vs sucides per population in 1000, NV.IND.TOTL.ZS  vs per population in 1000,  NV.IND.MANF.ZS vs sucicides per population in 1000, and  NV.AGR.TOTL.ZS vs sucicides per population in 1000. 
+
+### B. Visualization With 3 or more variables
+Muliple plots showing the relationship between the factor levels sex between population and sucicides per population in 1000, gdp for year vs suicides per population in 1000, NV.SRV.TOTL.ZS vs sucides per population in 1000, NV.IND.TOTL.ZS  vs per population in 1000,  NV.IND.MANF.ZS vs sucicides per population in 1000, and  NV.AGR.TOTL.ZS vs sucicides per population in 1000. 
 
 ```{r}
 # population
@@ -207,6 +215,8 @@ p6 <- ggplot(master, aes(x = NV.AGR.TOTL.ZS, y = suicides.100k.pop, colour = fac
 ggarrange(p1, p2, p3, p4, p5, p6, ncol = 2, nrow = 3)
 ```
 
+### C. Barplots
+We generated a barplot to display the frequency of countries in this dataset
 ```{r}
 # Bar plot of categorical variables in the dataset
 # count for countries
@@ -215,7 +225,7 @@ ggplot(master,aes(country)) +
   geom_bar(position="dodge") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
-
+Barplot to display the frequency for different age groups
 ```{r}
 # check counts for different age groups
 ggplot(master, aes(age)) +
@@ -223,17 +233,21 @@ ggplot(master, aes(age)) +
 
 ```
 
+Barplot to display the frequency between males and females in this dataset
 ```{r}
 #for genders
 ggplot(master, aes(sex)) +
   geom_bar(position = "dodge")
 ```
-
+Barplot to display the frequency of the different generations in the dataset
 ```{r}
 #different generation groups graph
 ggplot(master, aes(generation)) +
   geom_bar(position = "dodge")
 ```
+
+#D. Boxplot 
+We generated a boxplot to display the relationship between the sex and suicides per 100k, age vs suicides per 100k, and generation vs suicides per 100k. For instance, looking at the age group vs suicides per 100k, the boxplot shows that the highest number of suicides is associated with age groups greater than 75 years. 
 ```{r}
 # Boxplot plot of categorical variables and suicides.100k.pop
 p1 <- ggplot(master,
@@ -250,9 +264,14 @@ ggarrange(p1, p2, p3, ncol = 3, nrow = 1)
 
 
 # Part 4: Data Analysis
-## 4.1 Cluster analysis
-### First of all, the classification of variables as dummy variables. 
-###Secondly, standardization of data.
+## B. Unsupervised learning 
+### First, we generated the classification of variables as dummy variables. 
+### Secondly, we standardized the data.
+We a cluster plot to determine what the optimum k is. From the plot, we discovered that the optimal k is 8. This partitions all of the observations in the dataset into 8 clusters of groups of the population to make it easier to investigate the suicide number for each population group and which group of population has the highest suicide rates.
+
+
+
+
 ```{r}
 # dummy variables
 sex <- as.data.frame(model.matrix(~sex,master))
@@ -260,15 +279,18 @@ age <- as.data.frame(model.matrix(~age,master))
 generation <- as.data.frame(model.matrix(~generation, master))
 master2 <- cbind(master,age[,-1],sex[,-1],generation[,-1])
 master2 <- master2[,-c(3,4,10)]
+master2
 ```
 
 ```{r}
 # standardization
 master_scale <- scale(master2[,-c(1, 2, 3, 5)])
 master_scale <- as.data.frame(master_scale)
+master_scale
 ```
 
 ### K-means data analysis
+
 ```{r}
 # Determining the Best Cluster Number
 wss<-numeric(15)
@@ -277,8 +299,8 @@ for (k in 1:15){
 }
 plot(1:15, wss, 
      type = "b", 
-     xlab = "x",
-     ylab = "y")
+     xlab = "cluster",
+     ylab = "population")
 ```
 
 
@@ -287,18 +309,18 @@ plot(1:15, wss,
 ```{r}
 # K-means (k=3)
 km <- kmeans(master_scale, 3)
-suicides <- as.data.frame(cbind(master$suicides.100k.pop, km$cluster))
+suicides <- as.data.frame(cbind(master$population, km$cluster))
 boxplot(suicides$V1~suicides$V2, 
-        xlab="cluster", 
-        ylab = "suicides.100k.pop")
+        xlab="population cluster", 
+        ylab = "suicide number")
 ```
 ```{r}
 # K-means (k=4)
 km <- kmeans(master_scale, 4)
 suicides <- as.data.frame(cbind(master$suicides.100k.pop, km$cluster))
 boxplot(suicides$V1~suicides$V2, 
-        xlab="cluster", 
-        ylab = "suicides.100k.pop")
+        xlab="population cluster", 
+        ylab = "suicide number")
 ```
 
 ```{r}
@@ -306,16 +328,16 @@ boxplot(suicides$V1~suicides$V2,
 km <- kmeans(master_scale, 5)
 suicides <- as.data.frame(cbind(master$suicides.100k.pop, km$cluster))
 boxplot(suicides$V1~suicides$V2, 
-        xlab="cluster", 
-        ylab = "suicides.100k.pop")
+        xlab="population cluster", 
+        ylab = "suicide number")
 ```
 ```{r}
 # K-means (k=8)
 km <- kmeans(master_scale, 8)
 suicides <- as.data.frame(cbind(master$suicides.100k.pop, km$cluster))
 boxplot(suicides$V1~suicides$V2, 
-        xlab="cluster", 
-        ylab = "suicides.100k.pop")
+        xlab="population cluster", 
+        ylab = "suicide number")
 ```
 
 # .2 Multiple regression analysis
@@ -346,10 +368,10 @@ rmse
 ```
 ###.3  Random Simulation
 
-### Here we generated 1000 simulations for the mean of the number of suicides in the whole world for all ages, all countries, all of the generations, and all of the GDP in the world combined. We also generated a 95 percent confidence interval for the number of suicide means. We can conclude that we are 95 percent confident that the mean number of suicides in this world are between ~145 and ~ 380
+### Here we generated 1000 simulations for the mean of the number of suicides in the whole world for all ages, all countries, all of the generations, and all of the GDP in the world combined. We also generated a 95 percent confidence interval for the number of suicide means. We can conclude that we are 95 percent confident that the mean number of suicides in this world are between ~145 and ~ 380. This gives people a general idea of the average number of suicides that occur in the world. 
 
 ```{r}
-simanalysis_suicidemean<- 
+simanalysis_suicidemean <- 
   function() { 
     trials <-
       mean(~suicides_no, data = sample_n(master, size = 200, replace = TRUE), na.rm = TRUE)
@@ -364,3 +386,6 @@ sims
 confint(sims, level = 0.95)
 ```
  
+### Conclusion
+
+In this project we joined two datasets like Economic dataset and Master dataset which includes such variables(population, suicide_no, gdp) together to analyze the relationships with the number of suicides with the influential variables. We cleaned the data that had missing values. Then we used data wrangling and other statistical techniques to generate summary statistics. Then we generated different plots to explore the relationship between the suicide numbers and age, suicide numbers and gdp per year, etc. From these plots, we generated some useful observations such as: I learned that the highest number of suicides mainly fall in the age group of 75 years or more from the scatterplot. For example, in the plot showing the relationship between GDP and suicide rates, the number of suicides is the highest in males with the low GDP and in the boxplot, we can tell that the number of suicides is more common in males than in females. Then we did the kmeans data analysis for each of the population groups with the optimal k=8. Then we did a regression analysis using the data from 1997 to 2013 for training and data from 2014 to 2016 for testing.The rmse of multiple linear regression is 3.761684, and the RMSE of decision tree is 3.23228. The prediction of decision tree is more accurate. Finally, we ran 1000 random simulations for the mean number of suicides to gain knowledge and insight of how many suicides occur on average in the real world. 
