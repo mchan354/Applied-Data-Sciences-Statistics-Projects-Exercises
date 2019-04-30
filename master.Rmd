@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Stat 380 Final Project"
 output: html_document
 ---
 
@@ -10,6 +10,7 @@ library(dplyr)
 library(ggplot2)
 library(ggpubr)
 library(tidyr)
+library(mosaic)
 ```
 
 # Part 1: Data Preparation
@@ -211,7 +212,7 @@ ggplot(master,aes(country)) +
 ```{r}
 # check counts for different age groups
 ggplot(master, aes(age)) +
-  geom_bar(position = "dodge")
+  geom_bar(position = "dodge") + ggtitle("Counts for different age groups")
 
 ```
 
@@ -301,7 +302,14 @@ boxplot(suicides$V1~suicides$V2,
         xlab="cluster", 
         ylab = "suicides.100k.pop")
 ```
-
+```{r}
+# K-means (k=8)
+km <- kmeans(master_scale, 8)
+suicides <- as.data.frame(cbind(master$suicides.100k.pop, km$cluster))
+boxplot(suicides$V1~suicides$V2, 
+        xlab="cluster", 
+        ylab = "suicides.100k.pop")
+```
 
 # .2 Multiple regression analysis
 ### Data from 1997 to 2013 for training and data from 2014 to 2016 for testing.The rmse of multiple linear regression is 3.761684, and the RMSE of decision tree is 3.23228. The prediction of decision tree is more accurate.
@@ -329,5 +337,15 @@ lm_pre <- predict(fit_lm,testdata)
 rmse <- (sum((testdata$suicides.100k.pop-lm_pre) ^ 2) / nrow(master)) ^ 0.5
 rmse
 ```
+###.3  Random Simulation
 
-
+### Here are 500 simulations 
+```{r}
+trials_bootstrap <-
+  mosaic::do(500) * 
+  mean(~suicides_no, data = 
+           sample_n(master, size = 200, replace = TRUE), na.rm = TRUE)
+# 95% confidence interval for the median number of suicide rates 
+confint(trials_bootstrap, level = 0.95)
+```
+ 
