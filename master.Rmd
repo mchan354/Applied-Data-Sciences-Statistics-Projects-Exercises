@@ -1,5 +1,7 @@
 ---
 title: "Stat 380 Final Project"
+author: "Matthew Chan and Ziqi Tang"
+date:  "Due April 30, 2019"
 output: html_document
 ---
 
@@ -67,7 +69,6 @@ Economic_Industry <- fun1(value[2])
 Economic_Manufacturing <- fun1(value[3])
 Economic_Agriculture <- fun1(value[4])
 
-
 # Joins the data of the two different sources (Economic and Master)
 Economic2 <- merge(Economic_Services, Economic_Industry, 
                    all = T, 
@@ -79,7 +80,6 @@ Economic2 <- merge(Economic2, Economic_Agriculture,
                    all = T,
                    by=c("country","year"))
 ```
-
 
 We merged the master and Economic data set and we deleted all of our data that had missing values for our analysis. The output is the rate of the missing values.
 ```{r}
@@ -119,7 +119,6 @@ head(summarise(group_by(master, year, country),
 print(distinct(master, country))
 ```
 ## B. Spread & gather to stack/unstack variables
-
 We used the stack function to put together the sex, suicide numbers, and population and the unstack function to convert the dataset from stacked form to unstacked form to show the males and females along with their corresponding suicide number and population.
 ```{r,warning=F}
 # sex, suicides_no and population
@@ -130,9 +129,7 @@ head(data2)
 ```
 
 ## D. User-defined functions
-
 We set a user defined function called fun2 to calculate the mode of the suicide numbers.
-
 ```{r,warning=F}
 # Mode
 fun2 <- function(x){
@@ -147,7 +144,6 @@ fun2(master$suicides_no)
 ## E. loops and/or control flow
 
 We used a loop and control flow to calculate suicide rate for people over 35 years old and under 35 years old.It was found that the suicide rate of people over 35 years old was significantly higher than that of people under 35 years old. The suicide rate for men over 35 was 16.72724 percent and the suicide rate for people under 35 was 7.34 percent.
-
 ```{r,warning=F}
 age <- NA
 for(i in 1:nrow(master)){
