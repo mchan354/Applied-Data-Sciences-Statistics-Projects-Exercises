@@ -261,14 +261,31 @@ p3 <- ggplot(master, aes(x = generation, y = suicides.100k.pop, group = generati
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ggarrange(p1, p2, p3, ncol = 3, nrow = 1)
 ```
+# Boxplot for country vs suicide.100k.pop
+We generated a boxplot to show the relationship between country and suicides per 100k.pop. For instance by looking at the boxplot, we can tell that the country associated with the most suicide deaths is Russia.
+```{r}
+ggplot(master,aes(x=country,y=suicides.100k.pop,group=country))+
+  geom_boxplot()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+#  Correlation chart
+We generated a correlation chart to show the relationship between each variables in the data set used for analysis. From this correlation chart, we can tell that there is a strong correlation with suicide numbers and GDP per year and population.
+```{r}
+corr <- cor(master[,-c(1,2,3,4,10)])
+cor_dia_df <- as.data.frame(corr) %>%
+  mutate(var1=row.names(corr))%>%
+  gather(suicides_no:NV.AGR.TOTL.ZS,key=var2,value=correlation)
+ggplot(cor_dia_df)+
+  geom_tile(aes(var1,var2,fill=correlation))+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  scale_fill_gradient2()
+```
 
 
 # Part 4: Data Analysis
 
 # .A Supervised learning multiple regression analysis
-### Data from 1997 to 2013 for training and data from 2014 to 2016 for testing.The rmse of multiple linear regression is 3.761684, and the RMSE of decision tree is 3.23228. The prediction of decision tree is more accurate.
-
-
+Data from 1997 to 2013 for training and data from 2014 to 2016 for testing.The rmse of multiple linear regression is 3.761684, and the RMSE of decision tree is 3.23228. The prediction of decision tree is more accurate.
 ```{r}
 # train test split
 traindata <- master[-which(master$year > 2013), -5]
@@ -293,13 +310,7 @@ rmse
 ```
 
 ## B. Unsupervised learning 
-### First, we generated the classification of variables as dummy variables. 
-### Secondly, we standardized the data.
-We a cluster plot to determine what the optimum k is. From the plot, we discovered that the optimal k is 8. This partitions all of the observations in the dataset into 8 clusters of groups of the population to make it easier to investigate the suicide number for each population group and which group of population has the highest suicide rates.
-
-
-
-
+First, we generated the classification of variables as dummy variables.  Secondly, we standardized the data. We a cluster plot to determine what the optimum k is. From the plot, we discovered that the optimal k is 8. This partitions all of the observations in the dataset into 8 clusters of groups of the population to make it easier to investigate the suicide number for each population group and which group of population has the highest suicide rates.
 ```{r}
 # dummy variables
 sex <- as.data.frame(model.matrix(~sex,master))
@@ -368,9 +379,7 @@ boxplot(suicides$V1~suicides$V2,
         ylab = "suicide number")
 ```
 ###.C User-Defined Random Simulation
-
-### Here we generated 1000 simulations for the mean of the number of suicides in the whole world for all ages, all countries, all of the generations, and all of the GDP in the world combined. We also generated a 95 percent confidence interval for the number of suicide means. We can conclude that we are 95 percent confident that the mean number of suicides in this world are between ~145 and ~ 380. This gives people a general idea of the average number of suicides that occur in the world. 
-
+Here we generated 1000 simulations for the mean of the number of suicides in the whole world for all ages, all countries, all of the generations, and all of the GDP in the world combined. We also generated a 95 percent confidence interval for the number of suicide means. We can conclude that we are 95 percent confident that the mean number of suicides in this world are between ~145 and ~ 380. This gives people a general idea of the average number of suicides that occur in the world. 
 ```{r}
 simanalysis_suicidemean <- 
   function() { 
@@ -389,4 +398,4 @@ confint(sims, level = 0.95)
  
 ### Conclusion
 
-In this project we joined two datasets like Economic dataset and Master dataset which includes such variables(population, suicide_no, gdp) together to analyze the relationships with the number of suicides with the influential variables. We cleaned the data that had missing values. Then we used data wrangling and other statistical techniques to generate summary statistics. Then we generated different plots to explore the relationship between the suicide numbers and age, suicide numbers and gdp per year, etc. From these plots, we generated some useful observations such as: I learned that the highest number of suicides mainly fall in the age group of 75 years or more from the scatterplot. For example, in the plot showing the relationship between GDP and suicide rates, the number of suicides is the highest in males with the low GDP and in the boxplot, we can tell that the number of suicides is more common in males than in females. Then we did the kmeans data analysis for each of the population groups with the optimal k=8. Then we did a regression analysis using the data from 1997 to 2013 for training and data from 2014 to 2016 for testing.The rmse of multiple linear regression is 3.761684, and the RMSE of decision tree is 3.23228. The prediction of decision tree is more accurate. Finally, we ran 1000 random simulations for the mean number of suicides to gain knowledge and insight of how many suicides occur on average in the real world. 
+In this project we joined two datasets like Economic dataset and Master dataset which includes such variables(population, suicide_no, gdp) together to analyze the relationships with the number of suicides with the influential variables. We cleaned the data that had missing values. Then we used data wrangling and other statistical techniques to generate summary statistics. Then we generated different plots to explore the relationship between the suicide numbers and age, suicide numbers and gdp per year, etc. From these plots, we generated some useful observations such as: We learned that the highest number of suicides mainly fall in the age group of 75 years or more from the scatterplot. For example, in the plot showing the relationship between GDP and suicide rates, the number of suicides is the highest in males with the low GDP and in the boxplot, we can tell that the number of suicides is more common in males than in females. We generated a boxplot showing the relationship with country and suicide rates and found out that Russia had the highest suicde rates than the other ountries. We also generated a correlation chart to show the correlation between each variables in the dataset. We found that suicide numbers was strongly correlated with gpd per year and population. Then we did the kmeans data analysis for each of the population groups with the optimal k=8. Then we did a regression analysis using the data from 1997 to 2013 for training and data from 2014 to 2016 for testing.The rmse of multiple linear regression is 3.761684, and the RMSE of decision tree is 3.23228. The prediction of decision tree is more accurate. Finally, we ran 1000 random simulations for the mean number of suicides to gain knowledge and insight of how many suicides occur on average in the real world. 
