@@ -332,14 +332,12 @@ age <- as.data.frame(model.matrix(~age,master))
 generation <- as.data.frame(model.matrix(~generation, master))
 master2 <- cbind(master,age[,-1],sex[,-1],generation[,-1])
 master2 <- master2[,-c(3,4,10)]
-master2
 ```
 
 ```{r}
 # standardization
 master_scale <- scale(master2[,-c(1, 2, 3, 5)])
 master_scale <- as.data.frame(master_scale)
-master_scale
 ```
 
 ### K-means data analysis
