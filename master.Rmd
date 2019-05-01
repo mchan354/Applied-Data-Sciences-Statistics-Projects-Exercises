@@ -15,6 +15,8 @@ library(ggpubr)
 library(tidyr)
 library(mosaic)
 library(mclust)
+library(rpart)
+library(rpart.plot)
 ```
 
 # Part 1: Data Preparation
@@ -302,6 +304,25 @@ plot(fit_lm)
 lm_pre <- predict(fit_lm,testdata)
 # Using RMSE as the evluation score
 rmse <- (sum((testdata$suicides.100k.pop-lm_pre) ^ 2) / nrow(master)) ^ 0.5
+rmse
+```
+
+```{r}
+fit_tree <- rpart(suicides.100k.pop~.,data=traindata[,-c(1,2)])
+# Prune
+plotcp(fit_tree)
+```
+
+```{r}
+fit_tree2 <-prune(fit_tree, cp= fit_tree$cptable[which.min(fit_tree$cptable[,"xerror"]),"CP"]) 
+rpart.plot(fit_tree2,branch=1, under=TRUE, faclen=0,roundint=F,
+           cex=0.6, main="Decision Tree (pruned)")
+```
+
+```{r}
+# predict
+tree_pre <- predict(fit_tree2,testdata)
+rmse <- (sum((testdata$suicides.100k.pop-tree_pre)^2)/nrow(master))^0.5
 rmse
 ```
 
