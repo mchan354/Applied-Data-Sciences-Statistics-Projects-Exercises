@@ -175,7 +175,6 @@ apply(master[,c(5, 6, 7)], 2, mean)
 # Part 3: Data Visualization
 ## A. Scatter Plot Using geom
 A scatterplot is generated showing the relationship between population and suicide numbers. From the visual, it shows that when the population is between 0 and 2x10^7 , most of the number of sucides are between 0 and 5000. There are some outliers shown at the population of 2x10^7 (the greatest number of suicides occur with a population of 2x10^7 with a number of 20000 associated with some countries).
-
 ```{r,warning=F}
 
 # suicides_no and population
@@ -185,7 +184,6 @@ ggplot(master, aes(x = population, y = suicides_no, colour = suicides.100k.pop))
 
 ### B. Visualization With 3 or more variables
 Muliple plots showing the relationship between the factor levels sex between population and sucicides per population in 1000, gdp for year vs suicides per population in 1000, NV.SRV.TOTL.ZS vs sucides per population in 1000, NV.IND.TOTL.ZS  vs per population in 1000,  NV.IND.MANF.ZS vs sucicides per population in 1000, and  NV.AGR.TOTL.ZS vs sucicides per population in 1000. 
-
 ```{r}
 # population
 p1 <- ggplot(master, aes(x = population, y = suicides.100k.pop, colour = factor(sex))) +
