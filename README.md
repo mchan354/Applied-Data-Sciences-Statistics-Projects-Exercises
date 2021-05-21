@@ -1,1 +1,1 @@
-# Stat380Final_Chan_Tang
+# Applied Data Science/ Statistics Projects and Exercises
