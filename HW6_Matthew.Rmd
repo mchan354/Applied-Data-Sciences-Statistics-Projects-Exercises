@@ -1,0 +1,253 @@
+---
+title: "Homework 6"
+author: "Matthew Chan"
+date: "October 16, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
+library(nortest)
+library(MASS)
+library(EnvStats)
+library(nortest)
+```
+
+### Problem 1(i)
+
+```{r }
+shortleaf <- read.delim("shortleaf.txt", header=TRUE, sep="\t")
+```
+
+Diameter is the explanatory variable
+Volume is the response variable
+
+### Problem 1(ii)
+
+```{r}
+plot(shortleaf$Diam,shortleaf$Vol,ylab="Volume",xlab="Diameter",pch=16)
+```
+
+From my initial observations of the scatterplot, I know that the diameter is the explanatory variable and the volume is the response varaible. I  assume that there is a strong positive association between Diameter and Volume. I also see that there is a potential outlier at the point when the diameter is about 25 and the volume is around 150
+
+## Problem 1(iii)
+
+```{r}
+shortleafFit=lm(Vol~Diam, data= shortleaf)
+```
+
+
+ 
+```{r}
+plot(shortleaf$Diam,shortleaf$Vol,ylab="Volume",xlab="Diameter",pch=16)
+abline(shortleafFit,col="red")
+
+```
+
+
+### Problem 1(iv)
+```{r}
+summary(shortleafFit)
+```
+
+The slope is 6.8367 which states that the volume increases by 6.8367 for every unit of diameter.
+The intercept is -41.5681 which means that when the diameter is 0, the volume would be -41.5681 
+R squared is 0.8926 which means that the variablity of volume explained by diameter is 89.26 %.
+
+```{r}
+shortleaf_ri=studres(shortleafFit)  
+shortleaf_yihat=shortleafFit$fitted
+```
+
+```{r}
+plot(shortleaf_yihat,shortleaf_ri,xlab="Fitted Values", ylab="Studentized Residuals")
+abline(h=-3,col=2,lty=2)
+abline(h=3,col=2,lty=2)
+```
+
+According to the graph above, there seems to be possible linearity violations. The variance of the residuals seems to increase with fitted values though as suspected. There most likely is an outlier at around point 120. 
+
+```{r}
+qqnorm(shortleaf_ri)
+qqline(shortleaf_ri)
+```
+
+```{r}
+ad.test(shortleaf_ri)
+```
+
+From looking at the QQ plot above, and the anderson darling tes there seems to be obvious violations of normality since the p value is way less than 0.05, the null hypothesis that the data follows a normal distribution can be rejected and it can be concluded that there are obvious violations of normaility.
+
+### Problem 1(V)
+
+```{r}
+shortleaf_ri=studres(shortleafFit) 
+shortleaf_yihat=shortleafFit$fitted
+```
+
+```{r}
+plot(shortleaf_yihat,shortleaf_ri,xlab="Fitted Values", ylab="Studentized Residuals")
+abline(h=-3,col=2,lty=2)
+abline(h=3,col=2,lty=2)
+```
+
+```{r}
+shortleaf[abs(shortleaf_ri)==max(abs(shortleaf_ri)),]
+```
+
+The point with the highest residual is at index 70 where Diam is 23.4 and Vol is 163.5
+
+```{r}
+shortleaf[hatvalues(shortleafFit)==max(hatvalues(shortleafFit)),]
+```
+
+Highest leverage value is at index 70, diameter is 23.4 and volume 163.5 
+
+```{r}
+plot(cooks.distance(shortleafFit),ylab="Cook's Distance",type="h")
+abline(h=1,col="red",lty=2)
+```
+
+From the above chart the highest cook's distance is at index 70.
+
+I agree with the friend's comment. There is an influential point that needs to be investigated. Based on the output from the cook's distance, highest leverage point, and highest residuals, there clearly is an influential point. 
+
+### Problem 1vi
+
+I would clearly transform both of the variables. Prior to the transformations, there were clear violations of normality. Transforming the response variable will most likely improve the error terms while transforming the explanatory variable will most likely improve linearity results. 
+
+### Problem 1 vii
+
+```{r}
+shortleaf1=data.frame(shortleaf,log(shortleaf$Diam))
+names(shortleaf1)=c("Diam","Vol","lnDiam")
+```
+
+```{r}
+plot(shortleaf1$lnDiam,shortleaf1$Vol,xlab="Log(Diameter)",
+     ylab="Volume",pch=20)
+shortleafFit1=lm(Vol~lnDiam, data=shortleaf1)
+abline(shortleafFit1,col=2)
+```
+
+Based on the output above, the transformation seemed to have improve linearity a bit.
+
+```{r}
+plot(shortleafFit1$fitted.values,studres(shortleafFit1),ylab="Studentized Residuals",xlab="Fitted Values")
+abline(h=0,col=2,lty=2)
+```
+
+```{r}
+qqnorm(studres(shortleafFit1)) 
+qqline(studres(shortleafFit1))
+```
+
+```{r}
+ad.test(studres(shortleafFit1)) 
+```
+
+The p valueis way less than 0.05 so that states that the null hypothesis that the data follows a normal distribution is rejected and can conclude that normality is violated still. 
+
+### Problem 1 (viii)
+
+```{r}
+shortleaf2=data.frame(shortleaf1,log(shortleaf$Vol))
+names(shortleaf2)=c("Diam","Vol","lnDiam","lnVol")
+```
+
+```{r}
+plot(shortleaf2$lnDiam,shortleaf2$lnVol, xlab="Diameter",ylab="Log(Volume)")
+shortleaf2Fit=lm(lnVol~lnDiam,data=shortleaf2)
+abline(shortleaf2Fit,col='red')
+```
+
+There does not seem to be any deviations from linearity above. 
+
+```{r}
+plot(shortleaf2Fit$fitted.values,studres(shortleaf2Fit),ylab="Studentized Residuals",xlab="Fitted Values")
+abline(h=0,col=2,lty=2)
+```
+
+```{r}
+qqnorm(studres(shortleaf2Fit)) 
+qqline(studres(shortleaf2Fit))
+```
+
+```{r}
+ad.test(studres(shortleaf2Fit)) 
+```
+
+The additional transformation seems to have improved linearity by a lot. The p value is 0.1815 according to the anderson-Darling test so the null hypothesis can be failed to be rejected an conclude no violations of normality. 
+
+### Problem 1(ix)
+
+```{r}
+plot(cooks.distance(shortleaf2Fit),ylab="Cook's Distance",type="h")
+abline(h=0.05,col="red",lty=1)
+```
+```{r}
+shortleaf2_ri=studres(shortleaf2Fit)  
+```
+```{r}
+shortleaf2Fit_yihat=shortleaf2Fit$fitted
+```
+
+```{r}
+plot(shortleaf2Fit_yihat,shortleaf2_ri,xlab="Fitted Values", ylab="Studentized Residuals")
+abline(h=-3,col=2,lty=2)
+abline(h=3,col=2,lty=2)
+```
+
+Based on the above output, the highest cooks distance seems to fall at around index 10. 
+
+### Problem 1(x)
+
+```{r}
+shortleaf2new=shortleaf2[-10,]
+```
+
+```{r}
+plot(shortleaf2new$lnDiam,shortleaf2new$lnVol, xlab="Diameter",ylab="Log(Volume)")
+shortleaf2newFit=lm(lnVol~lnDiam,data=shortleaf2new)
+abline(shortleaf2newFit,col='red')
+```
+
+
+### problem 1 (xi)
+```{r}
+summary(shortleaf2newFit)
+```
+
+$$\hat{lnVol}= 2.8955*lnDiam - 2.93706$$ 
+
+The diameter increases by 2.8955 for every unit of volume
+The intercept states that when the diameter is 0, the volume is -2.93706
+
+### problem 1 (xii)
+
+```{r}
+cor(shortleaf2new$lnDiam, shortleaf2new$lnVol)
+```
+
+
+There appears to be a very strong postive linear relationship after the transformation of the predictor and response variable. The r value is 0.9878005.
+
+$$H_0:\hat{\beta}_0=0$$ 
+
+
+$$H_1: \hat{\beta}_0 \neq 0 $$
+
+$$t=\frac{(2.58955)}{0.04987}=51.92$$ 
+
+df = 67 and p value =  2X10^-16  from the output above so the null hypothesis can be rejected  and the slope is significantly different from 0. 
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
